@@ -1,0 +1,47 @@
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+# Step 1: Simulate hourly energy consumption data for 1 day (24 hours)
+np.random.seed(0)
+hours = np.arange(0, 24)
+energy_consumption = 50 + 10 * np.sin((np.pi / 12) * hours) + np.random.normal(0, 3, 24)
+
+# Store the data in a DataFrame
+df = pd.DataFrame({
+    'Hour': hours,
+    'Energy_Consumption_kWh': energy_consumption
+})
+
+# Step 2: Train Linear Regression model to forecast future consumption
+X = df[['Hour']]
+y = df['Energy_Consumption_kWh']
+
+model = LinearRegression()
+model.fit(X, y)
+
+# Step 3: Predict energy demand for the next 6 hours (i.e., hours 24–29)
+future_hours = pd.DataFrame({'Hour': np.arange(24, 30)})
+predicted_demand = model.predict(future_hours)
+
+# Step 4: Optimization Logic – add a buffer of +2 kWh for safety
+optimized_supply = [round(demand + 2) for demand in predicted_demand]
+
+# Step 5: Display Final Output
+print("== AI-Based Energy Optimization System ==")
+print("\nPast Hourly Consumption (kWh):\n", df)
+print("\nPredicted Energy Demand for Next 6 Hours:")
+for i, demand in zip(range(24, 30), predicted_demand):
+    print(f"Hour {i}: {demand:.2f} kWh")
+
+print("\nOptimized Energy Supply Plan (with buffer):")
+for i, supply in zip(range(24, 30), optimized_supply):
+    print(f"Hour {i}: {supply} kWh")
+
+# Step 6: Save results to CSV
+df_forecast = pd.DataFrame({
+    'Hour': np.arange(24, 30),
+    'Predicted_Demand_kWh': predicted_demand,
+    'Optimized_Supply_kWh': optimized_supply
+})
+df_forecast.to_csv("energy_optimization_output.csv", index=False)
